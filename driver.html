@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Bus Tracker</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4Dhpi-0FQgNxb2L0BnjHsla6DsHtixwk"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white; text-align: center;
+    }
+    h2 {
+      background: rgba(0,0,0,0.3);
+      padding: 10px; margin: 0;
+      font-size: 22px;
+    }
+    .container {
+      padding: 15px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 320px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      animation: fadeIn 1s ease-in-out;
+    }
+    select, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 90%;
+      border: none; border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #28a745; color: white;
+      cursor: pointer; transition: 0.3s;
+    }
+    button:hover { background: #218838; }
+    #map { height: 400px; width: 90%; margin: 20px auto; border-radius: 10px; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <h2>Admin - Update Bus Locations</h2>
+  <div class="container">
+    <select id="busId">
+      <option value="Bus1">Bus 1</option>
+      <option value="Bus2">Bus 2</option>
+    </select><br>
+    <select id="location">
+      <option value="Ernakulam Junction">Ernakulam Junction</option>
+      <option value="Vyttila Mobility Hub">Vyttila Mobility Hub</option>
+      <option value="Lulu Mall">Lulu Mall</option>
+      <option value="Kalamassery">Kalamassery</option>
+      <option value="Aluva Metro Station">Aluva Metro Station</option>
+    </select><br>
+    <select id="crowdLevel">
+      <option value="low">🟢 Low</option>
+      <option value="medium">🟡 Medium</option>
+      <option value="high">🔴 High</option>
+    </select><br>
+    <button onclick="updateBus()">Update Bus</button>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAfeMCs_uvnYVkd16x-9aXCuMf5wA4lejM",
+      authDomain: "bustrackingsystem-79ebd.firebaseapp.com",
+      databaseURL: "https://bustrackingsystem-79ebd-default-rtdb.firebaseio.com",
+      projectId: "bustrackingsystem-79ebd",
+      storageBucket: "bustrackingsystem-79ebd.appspot.com",
+      messagingSenderId: "58677247339",
+      appId: "1:58677247339:web:c846571ce997a82971202e",
+      measurementId: "G-FKB8JRLT17"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const locations = {
+      "Ernakulam Junction": { lat: 9.967427, lng: 76.287659 },
+      "Vyttila Mobility Hub": { lat: 9.967128, lng: 76.318123 },
+      "Lulu Mall": { lat: 10.027262, lng: 76.308319 },
+      "Kalamassery": { lat: 10.051102, lng: 76.326330 },
+      "Aluva Metro Station": { lat: 10.107600, lng: 76.351400 }
+    };
+
+    let map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 12,
+      center: { lat: 9.967427, lng: 76.287659 }
+    });
+    let markers = {};
+
+    // Show existing buses on map
+    db.ref("buses").on("value", (snapshot) => {
+      const data = snapshot.val();
+      for (let id in data) {
+        let bus = data[id];
+        let position = { lat: bus.lat, lng: bus.lng };
+        let color = bus.crowd === "low" ? "green" : bus.crowd === "medium" ? "yellow" : "red";
+
+        if (markers[id]) {
+          markers[id].setPosition(position);
+          markers[id].setIcon(`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`);
+        } else {
+          markers[id] = new google.maps.Marker({
+            map: map, position: position, title: id,
+            icon: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`
+          });
+        }
+      }
+    });
+
+    function updateBus() {
+      let busId = document.getElementById("busId").value;
+      let locationName = document.getElementById("location").value;
+      let crowd = document.getElementById("crowdLevel").value;
+      let loc = locations[locationName];
+
+      db.ref("buses/" + busId).set({
+        name: busId, lat: loc.lat, lng: loc.lng,
+        place: locationName, crowd: crowd, eta: "10 min"
+      });
+      alert("Bus Updated!");
+    }
+  </script>
+</body>
+</html>

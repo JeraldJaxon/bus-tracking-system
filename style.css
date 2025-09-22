@@ -1,0 +1,82 @@
+/* General Page Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f6f8;
+    color: #333;
+}
+
+/* Header */
+header {
+    background: #007BFF;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Admin Panel Form */
+.admin-form {
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 400px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Fields */
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+/* Button */
+button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+button:hover {
+    background: #0056b3;
+}
+
+/* Map Container */
+#map {
+    height: 500px;
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Side Panel for Bus Info */
+.bus-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 999;
+    width: 250px;
+}
+
+/* Bus Details in Side Panel */
+.bus-info h3 {
+    margin: 0;
+    color: #007BFF;
+    font-size: 18px;
+}
+.bus-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}

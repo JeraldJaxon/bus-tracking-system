@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User - Bus Locations</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4Dhpi-0FQgNxb2L0BnjHsla6DsHtixwk"></script>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; margin: 0; padding: 0; 
+      background: #eef2f3; text-align: center; 
+    }
+    h2 { 
+      background: #007bff; color: white; padding: 10px; margin: 0;
+    }
+    #map { height: 500px; width: 100%; border-radius: 10px; margin-top: 10px; }
+    .info-box {
+      position: absolute; top: 70px; left: 10px;
+      background: white; padding: 10px; border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-size: 14px; text-align: left;
+      min-width: 200px; z-index: 5;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .bus-info { margin: 8px 0; padding: 5px; border-bottom: 1px solid #ddd; }
+    .bus-info:last-child { border-bottom: none; }
+    .bus-title { font-weight: bold; color: #007bff; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <h2>Live Bus Locations</h2>
+  <div class="info-box" id="busInfo">
+    <h3>Bus Info</h3>
+    <div id="busDetails"></div>
+  </div>
+  <div id="map"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAfeMCs_uvnYVkd16x-9aXCuMf5wA4lejM",
+      authDomain: "bustrackingsystem-79ebd.firebaseapp.com",
+      databaseURL: "https://bustrackingsystem-79ebd-default-rtdb.firebaseio.com",
+      projectId: "bustrackingsystem-79ebd",
+      storageBucket: "bustrackingsystem-79ebd.appspot.com",
+      messagingSenderId: "58677247339",
+      appId: "1:58677247339:web:c846571ce997a82971202e",
+      measurementId: "G-FKB8JRLT17"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let map;
+    let markers = {};
+    const busNames = { "Bus1": "City Express", "Bus2": "Metro Rider" };
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 10.015, lng: 76.341 },
+        zoom: 12
+      });
+
+      onValue(ref(db, "buses"), (snapshot) => {
+        const buses = snapshot.val();
+        if (!buses) return;
+
+        document.getElementById("busDetails").innerHTML = "";
+
+        for (let id in buses) {
+          const bus = buses[id];
+          const position = { lat: bus.lat, lng: bus.lng };
+          const busIcon = {
+            url: "https://img.icons8.com/color/48/bus.png",
+            scaledSize: new google.maps.Size(40, 40)
+          };
+
+          // Update Info Box for each bus
+          document.getElementById("busDetails").innerHTML += `
+            <div class="bus-info">
+              <div class="bus-title">${busNames[id] || id}</div>
+              Route: ${bus.place || "Unknown"}<br>
+              Crowd: ${bus.crowd || "-"}<br>
+              ETA: ${bus.eta || "-"}
+            </div>
+          `;
+
+          // Add or update bus markers with label
+          if (markers[id]) {
+            markers[id].setPosition(position);
+          } else {
+            markers[id] = new google.maps.Marker({
+              position: position,
+              map: map,
+              title: `${busNames[id] || id}`,
+              icon: busIcon,
+              label: {
+                text: busNames[id] || id,
+                color: "black",
+                fontWeight: "bold",
+                fontSize: "12px"
+              }
+            });
+          }
+        }
+      });
+    }
+    window.onload = initMap;
+  </script>
+</body>
+</html>
